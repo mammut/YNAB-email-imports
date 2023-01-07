@@ -1,7 +1,7 @@
 # YNAB-email-imports
 Google Scripts that can import transactions into YNAB by parsing purchase notification emails from different institutions
 
-## How it works?
+## How does it works?
 1. A user purchases something using their AMEX Credit Card.
 1. AMEX sends an email notification with the transaction details (payee, amount) to the users gmail account.
 1. Gmail adds the label `YNAB-publish` to the transaction email.
@@ -45,4 +45,36 @@ In this step we will automatically categorize the emails for payment and purchas
     1. Click on the `Create Filter` button
 
 ### 3. Create Google Script
-*WIP...*
+1. Go to https://script.google.com/
+1. On the Sidebar click the `New Project` button at the top
+1. At the top, rename the project from `Untitled Project` to something meaningful.
+1. On the editor in the `Files` section click the `+` button and create the same script files as the ones in the [`src`](https://github.com/mammut/YNAB-email-imports/tree/main/src) of this repository
+1. Copy the contents of each file into the respective Google Script file.
+1. Update the first lines of `main.gs` to use your own constants:
+    1. **YNAB_ACCESS_TOKEN**: Can be obtained by following the [YNAB API Quick Start](https://api.youneedabudget.com/) guide.
+    1. **YNAB_BUDGET_ID**: It's the string from the URI when you open the app: `https://app.youneedabudget.com/<THIS-IS-YOUR-BUDGET-ID>/budget`
+    1. **YNAB_AMEX_ACCOUNT_ID**: Is the account id within YNAB, you can get if by opening clicking on your account in the YNAB app and checking the URI: `https://app.youneedabudget.com/<BUDGET-ID>/accounts/<THIS-IS-YOUR-ACCOUNT-ID>`
+1. At the top of the editor by the `run` button, select the `publishYNAB` from the dropdown. Then click `run`
+1. A popup will show up asking to review the permissions. Click `review permissions`
+1. Select your gmail account
+1. Click on the `Advence` link
+1. Click on `Go to YNAB Import Tutorial (unsafe)`
+1. Click the `Allow` button. This will grant the script access to your gmail account so it can read the emails
+
+At this point if you had an AMEX Large Purchase email in your `YNAB-publish` label, the transaction will show up in YNAB ready for you to review and approve/reject. The email will have been moved to `YNAB-done`.
+
+### 4. Setup periodic runs
+In this step we'll be adding a timebased trigger that will execute the `publishYNAB` function at a set interval.
+
+1. On the Google Script sidebar, click the `Clock (Triggers) button`
+1. Click on the bottom right button: `Add Trigger`
+1. Fill the details:
+  1. **Choose which function to run**: `publishYNAB`
+  1. **Choose which deployment should run**: `Head`
+  1. **Select event source**: `Time-driven`
+  1. **Select type of time based trigger**: `Minutes timer`
+  1. **Select minute interval**: `Every 5 Minutes`
+1. Click on the `Save` button
+
+Google Scripts will now trigger the `publishYNAB` function every 5 minutes. Feel free to play around with the intervals. Just be mindful of the [YNAB API Rate limits](https://api.youneedabudget.com/#rate-limiting)
+
