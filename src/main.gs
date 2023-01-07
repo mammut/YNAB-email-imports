@@ -17,7 +17,7 @@ const parserFactory = (message) => {
     case from.includes("americanexpress") && subject.includes("purchase approved"):
       return {parser: americanExpressParser, account_id: YNAB_AMEX_ACCOUNT_ID};
     default:
-      return (body, date) => null; // No-op
+      return {parser: null, account_id: null}; // No-op
   }
 }
 
@@ -29,6 +29,9 @@ function publishYNAB() {
   const transactions = threads.map(thread => {
     const transactions = thread.getMessages().map(message => {
       const {parser, account_id} = parserFactory(message);
+      if (parser == null || account_id == null) {
+        return null;
+      }
       return {
         ...parser(message.getBody(), message.getDate()), 
         account_id
